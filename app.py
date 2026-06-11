@@ -2,6 +2,12 @@ import streamlit as st
 import random
 from datetime import datetime
 from report_generator import generate_report
+from io import BytesIO
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.platypus import Table, TableStyle
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import inch
 
 st.set_page_config(
     page_title="Project 404: Humanity",
@@ -239,6 +245,20 @@ div[data-testid="stFormSubmitButton"] > button:hover {
     border-color: rgba(0,229,255,.65) !important;
     box-shadow: 0 0 35px rgba(0,229,255,.18);
     transform: translateY(-1px);
+}
+            .stDownloadButton > button {
+    background: linear-gradient(135deg, #00e5ff, #8b5cf6) !important;
+    color: white !important;
+    border: 1px solid rgba(0,229,255,.5) !important;
+    border-radius: 16px !important;
+    font-weight: 900 !important;
+    padding: 0.9rem 1.4rem !important;
+    box-shadow: 0 0 35px rgba(0,229,255,.2) !important;
+}
+
+.stDownloadButton > button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 45px rgba(139,92,246,.35) !important;
 }
 
 .main-btn button {
@@ -611,34 +631,115 @@ elif st.session_state.page == "Create Report":
 
             l, rr = st.columns(2)
 
-            with l:
-                card("Artifact Found", r["artifact"])
-                card("Alien Misinterpretation", r["misread"])
-                card("Human Observation", r["observation"])
+            report_text = f"""
+{r['title']}
 
-            with rr:
-                card("Emotional Discovery", r["emotion"])
-                card("What Aliens Finally Understood", r["understood"])
-                card("Museum Label", r["label"])
-                card("Final Line", r["final"])
+Topic: {topic.title()}
+Tone: {tone}
+Style: {style}
+Emotion Focus: {emotion}
+
+ARTIFACT FOUND
+{r['artifact']}
+
+ALIEN MISINTERPRETATION
+{r['misread']}
+
+HUMAN OBSERVATION
+{r['observation']}
+
+EMOTIONAL DISCOVERY
+{r['emotion']}
+
+WHAT ALIENS FINALLY UNDERSTOOD
+{r['understood']}
+
+MUSEUM LABEL
+{r['label']}
+
+FINAL LINE
+{r['final']}
+"""
+
+            buffer = BytesIO()
+
+            doc = SimpleDocTemplate(buffer)
+            styles = getSampleStyleSheet()
+            story = []
+
+            title_style = styles['Title']
+            normal_style = styles['BodyText']
+
+            story.append(Paragraph(r["title"], title_style))
+            story.append(Spacer(1, 0.2 * inch))
+
+            sections = [
+                ("Artifact Found", r["artifact"]),
+                ("Alien Misinterpretation", r["misread"]),
+                ("Human Observation", r["observation"]),
+                ("Emotional Discovery", r["emotion"]),
+                ("What Aliens Finally Understood", r["understood"]),
+                ("Museum Label", r["label"]),
+                ("Final Line", r["final"])
+            ]
+
+            for heading, body in sections:
+                story.append(Paragraph(f"<b>{heading}</b>", normal_style))
+                story.append(Paragraph(body, normal_style))
+                story.append(Spacer(1, 0.15 * inch))
+
+            doc.build(story)
+
+            pdf_data = buffer.getvalue()
+            buffer.close()
+
+            st.download_button(
+                label="DOWNLOAD DOSSIER PDF",
+                data=pdf_data,
+                file_name=f"project_404_{topic.lower().replace(' ', '_')}.pdf",
+                mime="application/pdf"
+            )
 
 elif st.session_state.page == "About":
-    st.markdown('<div class="big-title">ABOUT PROJECT 404</div>', unsafe_allow_html=True)
-    st.markdown("""
-    <div class="glass-card">
-      <p class="bodytext">
-      Project 404 is a cinematic creative app where an alien civilization studies extinct humanity
-      through artifacts, rituals, memories, and emotional signals. It is designed as an immersive
-      digital museum experience.
-      </p>
-    </div>
-    """, unsafe_allow_html=True)
+
+    st.markdown(
+        '<div class="big-title">ABOUT PROJECT 404</div>',
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        """
+        <div class="glass-card">
+            <p class="bodytext">
+            Project 404 is a cinematic creative app where an alien civilization studies extinct humanity
+            through artifacts, rituals, memories, and emotional signals. It is designed as an immersive
+            digital museum experience.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     st.markdown("### Timeline")
-    st.markdown("""
-    <div class="glass-card">
-      <div class="timeline-item"><b>Year 2197</b><br>Humanity disappeared, leaving behind scattered signals.</div>
-      <div class="timeline-item"><b>Year 4031</b><br>The first human artifacts were recovered from forgotten data vaults.</div>
-      <div class="timeline-item"><b>Year 5000</b><br>Project 404 was established to understand the species through what they left behind.</div>
-    </div>
-    """, unsafe_allow_html=True)
+
+    st.markdown(
+        """
+        <div class="glass-card">
+            <div class="timeline-item">
+                <b>Year 2197</b><br>
+                Humanity disappeared, leaving behind scattered signals.
+            </div>
+
+            <div class="timeline-item">
+                <b>Year 4031</b><br>
+                The first human artifacts were recovered from forgotten data vaults.
+            </div>
+
+            <div class="timeline-item">
+                <b>Year 5000</b><br>
+                Project 404 was established to understand the species through what they left behind.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
