@@ -663,42 +663,88 @@ FINAL LINE
 
             buffer = BytesIO()
 
-            doc = SimpleDocTemplate(buffer)
+            doc = SimpleDocTemplate(
+                buffer,
+                rightMargin=42,
+                leftMargin=42,
+                topMargin=42,
+                bottomMargin=42
+            )
+
             styles = getSampleStyleSheet()
             story = []
 
-            title_style = styles['Title']
-            normal_style = styles['BodyText']
+            title_style = styles["Title"]
+            title_style.textColor = colors.HexColor("#101827")
+            title_style.fontSize = 22
+            title_style.leading = 28
 
-            story.append(Paragraph(r["title"], title_style))
+            section_style = styles["Heading2"]
+            section_style.textColor = colors.HexColor("#111827")
+            section_style.fontSize = 12
+            section_style.leading = 16
+            section_style.spaceAfter = 6
+
+            body_style = styles["BodyText"]
+            body_style.textColor = colors.HexColor("#273449")
+            body_style.fontSize = 10.5
+            body_style.leading = 15
+
+            small_style = styles["BodyText"]
+            small_style.textColor = colors.HexColor("#52627A")
+            small_style.fontSize = 9
+            small_style.leading = 12
+
+            story.append(Paragraph("PROJECT 404: HUMANITY", title_style))
+            story.append(Paragraph("ALIEN HISTORICAL ARCHIVE // YEAR 5000", small_style))
             story.append(Spacer(1, 0.2 * inch))
 
+            story.append(Paragraph(r["title"], section_style))
+            story.append(Paragraph(f"Topic: {topic.title()} | Tone: {tone} | Style: {style} | Emotion: {emotion}", small_style))
+            story.append(Spacer(1, 0.25 * inch))
+
             sections = [
-                ("Artifact Found", r["artifact"]),
-                ("Alien Misinterpretation", r["misread"]),
-                ("Human Observation", r["observation"]),
-                ("Emotional Discovery", r["emotion"]),
-                ("What Aliens Finally Understood", r["understood"]),
-                ("Museum Label", r["label"]),
-                ("Final Line", r["final"])
+                ("ARTIFACT FOUND", r["artifact"]),
+                ("ALIEN MISINTERPRETATION", r["misread"]),
+                ("HUMAN OBSERVATION", r["observation"]),
+                ("EMOTIONAL DISCOVERY", r["emotion"]),
+                ("WHAT ALIENS FINALLY UNDERSTOOD", r["understood"]),
+                ("MUSEUM LABEL", r["label"]),
+                ("FINAL LINE", r["final"]),
             ]
 
             for heading, body in sections:
-                story.append(Paragraph(f"<b>{heading}</b>", normal_style))
-                story.append(Paragraph(body, normal_style))
-                story.append(Spacer(1, 0.15 * inch))
+                card_table = Table(
+                    [[Paragraph(f"<b>{heading}</b>", section_style)],
+                    [Paragraph(body, body_style)]],
+                    colWidths=[6.8 * inch]
+                )
+
+                card_table.setStyle(TableStyle([
+                    ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#F5F7FF")),
+                    ("BOX", (0, 0), (-1, -1), 0.8, colors.HexColor("#B7C7FF")),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 12),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 12),
+                    ("TOPPADDING", (0, 0), (-1, -1), 10),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
+                ]))
+
+                story.append(card_table)
+                story.append(Spacer(1, 0.16 * inch))
+
+            story.append(Spacer(1, 0.2 * inch))
+            story.append(Paragraph("Recovered by Project 404 Archive Node A-13", small_style))
 
             doc.build(story)
 
             pdf_data = buffer.getvalue()
             buffer.close()
-
             st.download_button(
-                label="DOWNLOAD DOSSIER PDF",
-                data=pdf_data,
-                file_name=f"project_404_{topic.lower().replace(' ', '_')}.pdf",
-                mime="application/pdf"
-            )
+                        label="DOWNLOAD DOSSIER PDF",
+                        data=pdf_data,
+                        file_name=f"project_404_{topic.lower().replace(' ', '_')}.pdf",
+                        mime="application/pdf"
+                    )
 
 elif st.session_state.page == "About":
 
