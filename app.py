@@ -8,6 +8,11 @@ from reportlab.platypus import Table, TableStyle
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
+from PIL import Image, ImageDraw, ImageFont
+import time
+import textwrap
+from gtts import gTTS
+import tempfile
 
 st.set_page_config(
     page_title="Project 404: Humanity",
@@ -147,31 +152,26 @@ st.markdown("""
     margin-top: 8px;
 }
 
-.radar {
-    height: 280px;
-    border-radius: 26px;
-    border: 1px solid rgba(0,229,255,.12);
-    background:
-      radial-gradient(circle at center, rgba(0,229,255,.28) 0 8%, transparent 9%),
-      radial-gradient(circle at center, transparent 0 24%, rgba(0,229,255,.08) 25%, transparent 26%),
-      radial-gradient(circle at center, transparent 0 42%, rgba(151,102,255,.10) 43%, transparent 44%),
-      radial-gradient(circle at center, rgba(0,229,255,.12), transparent 55%),
-      linear-gradient(135deg, rgba(10, 23, 45, .85), rgba(23, 11, 53, .85));
-    box-shadow: 0 0 55px rgba(0,229,255,.10);
-    position: relative;
-    overflow: hidden;
+.scan-radar{
+    width:90px;
+    height:90px;
+    border:4px solid #20f3ff;
+    border-radius:50%;
+    margin:auto;
+    position:relative;
+    animation:spin 2s linear infinite;
+    box-shadow:0 0 25px #20f3ff;
 }
 
-.radar:after {
-    content: "";
-    position: absolute;
-    width: 46%;
-    height: 46%;
-    left: 27%;
-    top: 27%;
-    border-radius: 50%;
-    border: 1px solid rgba(168, 134, 255, .28);
-    box-shadow: 0 0 40px rgba(111, 77, 255, .20);
+.scan-radar::after{
+    content:"";
+    position:absolute;
+    width:4px;
+    height:40px;
+    background:#20f3ff;
+    top:5px;
+    left:50%;
+    transform:translateX(-50%);
 }
 
 .sidebar-logo {
@@ -307,6 +307,58 @@ input, textarea, select {
     border-left: 3px solid #20f3ff;
     padding-left: 18px;
     margin-bottom: 22px;
+}
+            @keyframes pulseGlow {
+    0% {opacity:0.5;}
+    50% {opacity:1;}
+    100% {opacity:0.5;}
+}
+
+.loading-signal {
+    animation: pulseGlow 1.4s infinite;
+}
+            .loading-box{
+    text-align:center;
+    padding:35px;
+}
+
+.radar{
+    width:90px;
+    height:90px;
+    border:4px solid #20f3ff;
+    border-radius:50%;
+    margin:auto;
+    position:relative;
+    animation:spin 2s linear infinite;
+    box-shadow:0 0 25px #20f3ff;
+}
+
+.radar::after{
+    content:"";
+    position:absolute;
+    width:4px;
+    height:40px;
+    background:#20f3ff;
+    top:5px;
+    left:50%;
+    transform:translateX(-50%);
+}
+
+@keyframes spin{
+    from{transform:rotate(0deg);}
+    to{transform:rotate(360deg);}
+}
+
+.scan-text{
+    color:#20f3ff;
+    font-size:22px;
+    font-weight:800;
+    margin-top:25px;
+}
+
+.scan-sub{
+    color:#b9caff;
+    margin-top:15px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -494,6 +546,129 @@ def demo_report(topic, tone, style, emotion):
         "label": label,
         "final": final_line,
     }
+def create_poster(r):
+    from PIL import Image, ImageDraw, ImageFont
+    import textwrap
+    import random
+
+    W, H = 1080, 1350
+    img = Image.new("RGB", (W, H), "#050918")
+    draw = ImageDraw.Draw(img)
+
+    # ---------- Fonts ----------
+    try:
+        title_font = ImageFont.truetype("arialbd.ttf", 58)
+        sub_font = ImageFont.truetype("arial.ttf", 26)
+        heading_font = ImageFont.truetype("arialbd.ttf", 30)
+        body_font = ImageFont.truetype("arial.ttf", 25)
+        small_font = ImageFont.truetype("arial.ttf", 20)
+    except:
+        title_font = ImageFont.load_default()
+        sub_font = ImageFont.load_default()
+        heading_font = ImageFont.load_default()
+        body_font = ImageFont.load_default()
+        small_font = ImageFont.load_default()
+
+    cyan = "#20F3FF"
+    violet = "#8B5CF6"
+    white = "#FFFFFF"
+    soft = "#B9CAFF"
+    card = "#0B1028"
+
+    # ---------- Background gradient ----------
+    for y in range(H):
+        r_col = int(5 + y / H * 10)
+        g_col = int(9 + y / H * 8)
+        b_col = int(24 + y / H * 36)
+        draw.line((0, y, W, y), fill=(r_col, g_col, b_col))
+
+    # ---------- Stars ----------
+    for _ in range(160):
+        x = random.randint(0, W)
+        y = random.randint(0, H)
+        size = random.randint(1, 3)
+        draw.ellipse((x, y, x + size, y + size), fill="#203A5F")
+
+    # ---------- Header ----------
+    draw.text((60, 55), "ALIEN HISTORICAL ARCHIVE // YEAR 5000", fill=cyan, font=small_font)
+    draw.text((60, 95), "PROJECT 404: HUMANITY", fill=white, font=title_font)
+    draw.text((60, 165), r["title"], fill=soft, font=sub_font)
+
+    # ---------- Artifact visual panel ----------
+    panel = (90, 240, 990, 620)
+    draw.rounded_rectangle(panel, radius=34, fill="#071225", outline=violet, width=3)
+
+    cx, cy = 540, 430
+
+    # Glow circles
+    for radius, alpha_color in [(170, "#102B55"), (125, "#143866"), (80, "#1E6B88")]:
+        draw.ellipse((cx-radius, cy-radius, cx+radius, cy+radius), outline=alpha_color, width=4)
+
+    # Central artifact object
+    topic_text = r.get("label", "").lower() + " " + r.get("artifact", "").lower()
+
+    if "cricket" in topic_text:
+        draw.line((410, 520, 640, 330), fill="#E7B76D", width=22)
+        draw.ellipse((675, 365, 740, 430), fill="#C94C4C", outline=white, width=3)
+    elif "instagram" in topic_text or "phone" in topic_text or "mirror" in topic_text:
+        draw.rounded_rectangle((430, 300, 650, 560), radius=28, fill="#111827", outline=cyan, width=5)
+        draw.ellipse((510, 380, 570, 440), outline=violet, width=5)
+        draw.rectangle((465, 505, 615, 525), fill="#22304A")
+    elif "money" in topic_text:
+        for i in range(3):
+            x = 410 + i * 65
+            draw.rounded_rectangle((x, 360+i*22, x+260, 470+i*22), radius=14, fill="#173B32", outline=cyan, width=3)
+            draw.text((x+92, 395+i*22), "$", fill="#9DFFCB", font=title_font)
+    elif "love" in topic_text or "friendship" in topic_text:
+        draw.polygon([(540, 535), (390, 390), (455, 320), (540, 380), (625, 320), (690, 390)], fill="#B83A78", outline=cyan)
+    elif "exam" in topic_text:
+        draw.rounded_rectangle((410, 310, 670, 540), radius=18, fill="#E6E8F0", outline=cyan, width=4)
+        for i in range(6):
+            draw.line((445, 350+i*30, 635, 350+i*30), fill="#28364F", width=3)
+        draw.line((700, 330, 620, 560), fill="#F0C36A", width=16)
+    elif "tea" in topic_text or "food" in topic_text:
+        draw.rounded_rectangle((430, 390, 650, 510), radius=35, fill="#6B3F22", outline=cyan, width=4)
+        draw.arc((620, 410, 730, 500), 270, 90, fill=cyan, width=8)
+        for sx in [480, 530, 580]:
+            draw.line((sx, 360, sx+10, 310), fill="#B9CAFF", width=3)
+    else:
+        draw.polygon([(540, 300), (690, 430), (540, 560), (390, 430)], fill="#182044", outline=cyan)
+        draw.ellipse((485, 375, 595, 485), outline=violet, width=6)
+
+    draw.text((330, 650), "RECOVERED HUMAN ARTIFACT", fill=cyan, font=heading_font)
+
+    # ---------- Text cards ----------
+    def wrap_text(text, width=52):
+        return textwrap.fill(str(text), width=width)
+
+    def draw_card(y, heading, body, max_chars=330):
+        draw.rounded_rectangle((60, y, 1020, y + 170), radius=24, fill=card, outline="#243B72", width=2)
+        draw.text((90, y + 26), heading, fill=cyan, font=heading_font)
+
+        wrapped = wrap_text(body[:max_chars], width=62)
+        draw.multiline_text((90, y + 70), wrapped, fill=white, font=body_font, spacing=7)
+        return y + 200
+
+    y = 720
+    y = draw_card(y, "ARTIFACT FOUND", r["artifact"], 280)
+    y = draw_card(y, "EMOTIONAL DISCOVERY", r["emotion"], 280)
+
+    # Final line panel
+    draw.rounded_rectangle((60, y, 1020, y + 170), radius=24, fill="#111A3A", outline=violet, width=3)
+    draw.text((90, y + 28), "FINAL TRANSMISSION", fill=cyan, font=heading_font)
+    draw.multiline_text(
+        (90, y + 75),
+        wrap_text(r["final"][:260], width=62),
+        fill=soft,
+        font=body_font,
+        spacing=7
+    )
+
+    # Footer
+    draw.text((60, 1295), "Recovered by Archive Node A-13", fill="#7890B5", font=small_font)
+    draw.text((760, 1295), "PROJECT 404", fill="#7890B5", font=small_font)
+
+    return img
 def card(title, body):
     st.markdown(f"""
     <div class="glass-card">
@@ -559,10 +734,27 @@ elif st.session_state.page == "Create Report":
           <p class="bodytext">Choose how alien historians should study this recovered human behavior.</p>
         </div>
         """, unsafe_allow_html=True)
+        example_topics = [
+    "Instagram",
+    "Cricket",
+    "Exams",
+    "Money",
+    "Marriage",
+    "Love",
+    "Food",
+    "Politics",
+    "Tea",
+    "Friendship",
+    "WhatsApp",
+    "Memes"
+]
+        if st.button("🎲 RANDOM HUMAN SIGNAL"):
+            st.session_state.random_topic = random.choice(example_topics)
 
         with st.form("report_form"):
             topic = st.text_input(
                 "Human Topic",
+                value=st.session_state.get("random_topic", ""),
                 placeholder="Search ancient signal... e.g. Instagram, Cricket, Exams, Money"
             )
 
@@ -591,33 +783,56 @@ elif st.session_state.page == "Create Report":
 
     with right:
         preview_topic = topic.strip().title() if "topic" in locals() and topic.strip() else "Unknown"
-    preview_status = "Ready to Scan" if preview_topic != "Unknown" else "Waiting for Input"
-    preview_signal = preview_topic if preview_topic != "Unknown" else "Unknown Human Signal"
+        preview_status = "Ready to Scan" if preview_topic != "Unknown" else "Waiting for Input"
+        preview_signal = preview_topic if preview_topic != "Unknown" else "Unknown Human Signal"
 
-    st.markdown(f"""
-    <div class="glass-card">
-      <div class="section-label">LIVE ARTIFACT SCANNER</div>
-      <h2 style="margin-top:0;color:#eaf6ff;">{preview_status}</h2>
-      <p class="bodytext">
-      This scanner previews the human signal before the archive creates the final dossier.
-      </p>
+        st.markdown(f"""
+        <div class="glass-card">
+        <div class="section-label">LIVE ARTIFACT SCANNER</div>
+        <h2 style="margin-top:0;color:#eaf6ff;">{preview_status}</h2>
+        <p class="bodytext">
+        This scanner previews the human signal before the archive creates the final dossier.
+        </p>
 
-      <div class="radar" style="height:300px;margin-top:22px;"></div>
+        <div class="radar" style="height:300px;margin-top:22px;"></div>
 
-      <p class="bodytext" style="margin-top:22px;">
-      <b>Archive Node:</b> A-13<br>
-      <b>Status:</b> {preview_status}<br>
-      <b>Detected Signal:</b> {preview_signal}<br>
-      <b>Archive Year:</b> 5000
-      </p>
-    </div>
-    """, unsafe_allow_html=True)
+        <p class="bodytext" style="margin-top:22px;">
+        <b>Archive Node:</b> A-13<br>
+        <b>Status:</b> {preview_status}<br>
+        <b>Detected Signal:</b> {preview_signal}<br>
+        <b>Archive Year:</b> 5000
+        </p>
+        </div>
+        """, unsafe_allow_html=True)
 
     if submitted:
         if not topic or not tone or not style or not emotion:
             st.warning("Please complete all investigation fields first.")
         else:
+            loading_box = st.empty()
+
+            messages = [
+                "Recovering lost fragments...",
+                "Decoding emotional residue...",
+                "Scanning archive node A-13...",
+                "Reconstructing extinct memories...",
+                "Analyzing human behavior..."
+            ]
+
+            for i in range(5):
+
+                loading_box.markdown(
+                    f'<div class="glass-card loading-box">'
+                    f'<div class="scan-radar"></div>'
+                    f'<div class="scan-text">SCANNING LOST HUMAN SIGNAL...</div>'
+                    f'<div class="scan-sub">{messages[i]}</div>'
+                    f'<div style="margin-top:20px;color:#20f3ff;font-size:30px;">{20 * (i + 1)}%</div>'
+                    f'</div>',
+                    unsafe_allow_html=True
+                )
+                time.sleep(0.4)
             r = generate_report(topic, tone, style, emotion)
+            loading_box.empty()
 
             st.write("")
             st.markdown(f"""
@@ -630,6 +845,16 @@ elif st.session_state.page == "Create Report":
             """, unsafe_allow_html=True)
 
             l, rr = st.columns(2)
+            with l:
+                card("Artifact Found", r["artifact"])
+                card("Alien Misinterpretation", r["misread"])
+                card("Human Observation", r["observation"])
+
+            with rr:
+                card("Emotional Discovery", r["emotion"])
+                card("What Aliens Finally Understood", r["understood"])
+                card("Museum Label", r["label"])
+                card("Final Line", r["final"])
 
             report_text = f"""
 {r['title']}
@@ -745,6 +970,58 @@ FINAL LINE
                         file_name=f"project_404_{topic.lower().replace(' ', '_')}.pdf",
                         mime="application/pdf"
                     )
+            
+            
+            poster = create_poster(r)
+
+            poster_buffer = BytesIO()
+            poster.save(poster_buffer, format="PNG")
+            poster_bytes = poster_buffer.getvalue()
+
+            st.download_button(
+                label="DOWNLOAD POSTER",
+                data=poster_bytes,
+                file_name=f"project_404_{topic.lower().replace(' ','_')}_poster.png",
+                mime="image/png"
+            )
+            voice_text = f"""
+            Transmission begins.
+            Project 404 Humanity.
+            {r['title']}
+
+            Artifact Found.
+            {r['artifact']}
+
+            Alien Misinterpretation.
+            {r['misread']}
+
+            Human Observation.
+            {r['observation']}
+
+            Emotional Discovery.
+            {r['emotion']}
+
+            What Aliens Finally Understood.
+            {r['understood']}
+
+            Museum Label.
+            {r['label']}
+
+            Final Transmission.
+            {r['final']}
+
+            Transmission complete.
+            Archive Node A-13 closing record.
+            """
+
+            tts = gTTS(text=voice_text, lang="en", slow=True)
+
+            audio_buffer = BytesIO()
+            tts.write_to_fp(audio_buffer)
+            audio_buffer.seek(0)
+
+            st.markdown("### 🎙 Alien Historian Voice")
+            st.audio(audio_buffer, format="audio/mp3")
 
 elif st.session_state.page == "About":
 
@@ -769,23 +1046,25 @@ elif st.session_state.page == "About":
     st.markdown("### Timeline")
 
     st.markdown(
-        """
-        <div class="glass-card">
-            <div class="timeline-item">
-                <b>Year 2197</b><br>
-                Humanity disappeared, leaving behind scattered signals.
-            </div>
+"""
+<div class="glass-card">
 
-            <div class="timeline-item">
-                <b>Year 4031</b><br>
-                The first human artifacts were recovered from forgotten data vaults.
-            </div>
+<div class="timeline-item">
+<b>Year 2197</b><br>
+Humanity disappeared, leaving behind scattered signals.
+</div>
 
-            <div class="timeline-item">
-                <b>Year 5000</b><br>
-                Project 404 was established to understand the species through what they left behind.
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+<div class="timeline-item">
+<b>Year 4031</b><br>
+The first human artifacts were recovered from forgotten data vaults.
+</div>
+
+<div class="timeline-item">
+<b>Year 5000</b><br>
+Project 404 was established to understand the species through what they left behind.
+</div>
+
+</div>
+""",
+unsafe_allow_html=True
+)
