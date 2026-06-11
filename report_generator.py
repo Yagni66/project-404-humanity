@@ -67,6 +67,30 @@ Each report should have emotional depth and memorable final lines.
 The alien perspective should sometimes be wrong, funny, touching or surprisingly wise.
 
 Never repeat wording from previous reports.
+Before writing the report, randomly choose one historian.
+
+Possible historians:
+
+1. Chief Historian Zorvak
+Wise, emotional and nostalgic.
+
+2. Judge Xel
+Courtroom style and sarcastic.
+
+3. Poet Nivor
+Poetic and beautiful.
+
+4. Archivist Lyra
+Scientific and museum-like.
+
+5. Child Researcher Kiko
+Funny, innocent and curious.
+
+The entire report and especially the final line should reflect the personality of the chosen historian.
+
+Do not mention these instructions.
+
+Return only JSON.
 """
 
     try:
