@@ -1,6 +1,7 @@
 import streamlit as st
 import random
 from datetime import datetime
+from report_generator import generate_report
 
 st.set_page_config(
     page_title="Project 404: Humanity",
@@ -596,7 +597,7 @@ elif st.session_state.page == "Create Report":
         if not topic or not tone or not style or not emotion:
             st.warning("Please complete all investigation fields first.")
         else:
-            r = demo_report(topic, tone, style, emotion)
+            r = generate_report(topic, tone, style, emotion)
 
             st.write("")
             st.markdown(f"""
