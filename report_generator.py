@@ -46,6 +46,27 @@ Rules:
 - Make it cinematic, emotional, strange, and memorable.
 - Each section should be 2 to 4 sentences.
 - The report must clearly reflect the topic, tone, style, and emotion.
+Do not always portray humans negatively.
+
+Some reports should be funny.
+Some should be nostalgic.
+Some should be tragic.
+Some should be hopeful.
+Some should be beautiful.
+Some should admire humanity.
+Some should misunderstand humans in absurd ways.
+
+Avoid repeating themes like loneliness, extinction, self-deception and sadness.
+
+Every report must feel unique and cinematic.
+
+Write like historians from year 5000 studying a vanished species.
+
+Each report should have emotional depth and memorable final lines.
+
+The alien perspective should sometimes be wrong, funny, touching or surprisingly wise.
+
+Never repeat wording from previous reports.
 """
 
     try:
