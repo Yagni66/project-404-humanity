@@ -8,12 +8,8 @@ from reportlab.platypus import Table, TableStyle
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
-from PIL import Image, ImageDraw, ImageFont
 import time
 import textwrap
-from gtts import gTTS
-import tempfile
-
 st.set_page_config(
     page_title="Project 404: Humanity",
     page_icon="👽",
@@ -546,96 +542,6 @@ def demo_report(topic, tone, style, emotion):
         "label": label,
         "final": final_line,
     }
-def create_poster(r):
-    from PIL import Image, ImageDraw, ImageFont
-    import textwrap
-    import random
-
-    W, H = 1080, 1350
-    img = Image.new("RGB", (W, H), "#050918")
-    draw = ImageDraw.Draw(img)
-
-    # ---------- Fonts ----------
-    try:
-        title_font = ImageFont.truetype("arialbd.ttf", 58)
-        sub_font = ImageFont.truetype("arial.ttf", 26)
-        heading_font = ImageFont.truetype("arialbd.ttf", 30)
-        body_font = ImageFont.truetype("arial.ttf", 25)
-        small_font = ImageFont.truetype("arial.ttf", 20)
-    except:
-        title_font = ImageFont.load_default()
-        sub_font = ImageFont.load_default()
-        heading_font = ImageFont.load_default()
-        body_font = ImageFont.load_default()
-        small_font = ImageFont.load_default()
-
-    cyan = "#20F3FF"
-    violet = "#8B5CF6"
-    white = "#FFFFFF"
-    soft = "#B9CAFF"
-    card = "#0B1028"
-
-    # ---------- Background gradient ----------
-    for y in range(H):
-        r_col = int(5 + y / H * 10)
-        g_col = int(9 + y / H * 8)
-        b_col = int(24 + y / H * 36)
-        draw.line((0, y, W, y), fill=(r_col, g_col, b_col))
-
-    # ---------- Stars ----------
-    for _ in range(160):
-        x = random.randint(0, W)
-        y = random.randint(0, H)
-        size = random.randint(1, 3)
-        draw.ellipse((x, y, x + size, y + size), fill="#203A5F")
-
-    # ---------- Header ----------
-    draw.text((60, 55), "ALIEN HISTORICAL ARCHIVE // YEAR 5000", fill=cyan, font=small_font)
-    draw.text((60, 95), "PROJECT 404: HUMANITY", fill=white, font=title_font)
-    draw.text((60, 165), r["title"], fill=soft, font=sub_font)
-
-    # ---------- Artifact visual panel ----------
-    panel = (90, 240, 990, 620)
-    draw.rounded_rectangle(panel, radius=34, fill="#071225", outline=violet, width=3)
-
-    cx, cy = 540, 430
-
-    # Glow circles
-    for radius, alpha_color in [(170, "#102B55"), (125, "#143866"), (80, "#1E6B88")]:
-        draw.ellipse((cx-radius, cy-radius, cx+radius, cy+radius), outline=alpha_color, width=4)
-
-    # Central artifact object
-    topic_text = r.get("label", "").lower() + " " + r.get("artifact", "").lower()
-
-    if "cricket" in topic_text:
-        draw.line((410, 520, 640, 330), fill="#E7B76D", width=22)
-        draw.ellipse((675, 365, 740, 430), fill="#C94C4C", outline=white, width=3)
-    elif "instagram" in topic_text or "phone" in topic_text or "mirror" in topic_text:
-        draw.rounded_rectangle((430, 300, 650, 560), radius=28, fill="#111827", outline=cyan, width=5)
-        draw.ellipse((510, 380, 570, 440), outline=violet, width=5)
-        draw.rectangle((465, 505, 615, 525), fill="#22304A")
-    elif "money" in topic_text:
-        for i in range(3):
-            x = 410 + i * 65
-            draw.rounded_rectangle((x, 360+i*22, x+260, 470+i*22), radius=14, fill="#173B32", outline=cyan, width=3)
-            draw.text((x+92, 395+i*22), "$", fill="#9DFFCB", font=title_font)
-    elif "love" in topic_text or "friendship" in topic_text:
-        draw.polygon([(540, 535), (390, 390), (455, 320), (540, 380), (625, 320), (690, 390)], fill="#B83A78", outline=cyan)
-    elif "exam" in topic_text:
-        draw.rounded_rectangle((410, 310, 670, 540), radius=18, fill="#E6E8F0", outline=cyan, width=4)
-        for i in range(6):
-            draw.line((445, 350+i*30, 635, 350+i*30), fill="#28364F", width=3)
-        draw.line((700, 330, 620, 560), fill="#F0C36A", width=16)
-    elif "tea" in topic_text or "food" in topic_text:
-        draw.rounded_rectangle((430, 390, 650, 510), radius=35, fill="#6B3F22", outline=cyan, width=4)
-        draw.arc((620, 410, 730, 500), 270, 90, fill=cyan, width=8)
-        for sx in [480, 530, 580]:
-            draw.line((sx, 360, sx+10, 310), fill="#B9CAFF", width=3)
-    else:
-        draw.polygon([(540, 300), (690, 430), (540, 560), (390, 430)], fill="#182044", outline=cyan)
-        draw.ellipse((485, 375, 595, 485), outline=violet, width=6)
-
-    draw.text((330, 650), "RECOVERED HUMAN ARTIFACT", fill=cyan, font=heading_font)
 
     # ---------- Text cards ----------
     def wrap_text(text, width=52):
@@ -669,6 +575,8 @@ def create_poster(r):
     draw.text((760, 1295), "PROJECT 404", fill="#7890B5", font=small_font)
 
     return img
+
+        
 def card(title, body):
     st.markdown(f"""
     <div class="glass-card">
@@ -855,6 +763,7 @@ elif st.session_state.page == "Create Report":
                 card("What Aliens Finally Understood", r["understood"])
                 card("Museum Label", r["label"])
                 card("Final Line", r["final"])
+            
 
             report_text = f"""
 {r['title']}
@@ -972,57 +881,8 @@ FINAL LINE
                     )
             
             
-            poster = create_poster(r)
-
-            poster_buffer = BytesIO()
-            poster.save(poster_buffer, format="PNG")
-            poster_bytes = poster_buffer.getvalue()
-
-            st.download_button(
-                label="DOWNLOAD POSTER",
-                data=poster_bytes,
-                file_name=f"project_404_{topic.lower().replace(' ','_')}_poster.png",
-                mime="image/png"
-            )
-            voice_text = f"""
-            Transmission begins.
-            Project 404 Humanity.
-            {r['title']}
-
-            Artifact Found.
-            {r['artifact']}
-
-            Alien Misinterpretation.
-            {r['misread']}
-
-            Human Observation.
-            {r['observation']}
-
-            Emotional Discovery.
-            {r['emotion']}
-
-            What Aliens Finally Understood.
-            {r['understood']}
-
-            Museum Label.
-            {r['label']}
-
-            Final Transmission.
-            {r['final']}
-
-            Transmission complete.
-            Archive Node A-13 closing record.
-            """
-
-            tts = gTTS(text=voice_text, lang="en", slow=True)
-
-            audio_buffer = BytesIO()
-            tts.write_to_fp(audio_buffer)
-            audio_buffer.seek(0)
-
-            st.markdown("### 🎙 Alien Historian Voice")
-            st.audio(audio_buffer, format="audio/mp3")
-
+            
+           
 elif st.session_state.page == "About":
 
     st.markdown(
