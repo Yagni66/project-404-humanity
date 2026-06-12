@@ -9,10 +9,7 @@ load_dotenv()
 
 api_keys = [
     os.getenv("GEMINI_API_KEY_1"),
-    os.getenv("GEMINI_API_KEY_2"),
-    os.getenv("GEMINI_API_KEY_3"),
-    os.getenv("GEMINI_API_KEY_4"),
-    os.getenv("GEMINI_API_KEY_5"),
+    
 ]
 
 api_keys = [key for key in api_keys if key]
